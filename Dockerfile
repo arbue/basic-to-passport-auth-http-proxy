@@ -1,5 +1,4 @@
-FROM node:12
-LABEL org.opencontainers.image.authors="Stefan Kleeschulte"
+FROM node:20
 WORKDIR /usr/src/app
 RUN npm install forever -g
 COPY package*.json ./
