@@ -1,8 +1,8 @@
-const http = require('http');
-const { assert } = require('chai');
-const AuthHeader = require('../../../lib/AuthHeader');
-const parsePassportParameters = require('../../../lib/parsePassportParameters');
-const { getUserdata } = require('./users');
+import { createServer } from 'http';
+import { assert } from 'chai';
+import { AuthHeader } from '../../../lib/AuthHeader.js';
+import { parsePassportParameters } from '../../../lib/parsePassportParameters.js';
+import { getUserdata } from './users.js';
 
 function send401(res) {
     res.setHeader('WWW-Authenticate', 'Passport1.4 da-status=failed,srealm=PassportTest,ctoken=abc');
@@ -11,7 +11,7 @@ function send401(res) {
 }
 
 // eslint-disable-next-line consistent-return
-const server = http.createServer((req, res) => {
+export const authenticationServer = createServer((req, res) => {
     res.setHeader('PassportConfig', 'ConfigVersion=1');
 
     const authorizationHeader = new AuthHeader(req.headers.authorization);
@@ -64,5 +64,3 @@ const server = http.createServer((req, res) => {
         + `,from-PP=${userdata.directory},ru=${challengeParameters['ru']}`);
     res.end();
 });
-
-module.exports = server;

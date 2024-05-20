@@ -1,7 +1,7 @@
-const http = require('http');
-const config = require('./config');
+import { createServer } from 'http';
+import { config } from './config.js';
 
-const server = http.createServer((req, res) => {
+export const configurationServer = createServer((req, res) => {
     const configurationData = 'DARealm=PassportTest'
         + `,DALogin=${config.AUTHENTICATION_SERVER_URL}`
         + ',DAReg=https://error.localhost/'
@@ -16,4 +16,3 @@ const server = http.createServer((req, res) => {
     res.end();
 });
 
-module.exports = server;

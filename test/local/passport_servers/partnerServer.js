@@ -1,15 +1,15 @@
-const http = require('http');
-const tough = require('tough-cookie');
-const { assert } = require('chai');
-const AuthHeader = require('../../../lib/AuthHeader');
-const config = require('./config');
-const { getContent } = require('./users');
+import { createServer } from 'http';
+import { Cookie } from 'tough-cookie';
+import { assert } from 'chai';
+import { AuthHeader } from '../../../lib/AuthHeader.js';
+import { config } from './config.js';
+import { getContent } from './users.js';
 
 // eslint-disable-next-line consistent-return
-const server = http.createServer((req, res) => {
+export const partnerServer = createServer((req, res) => {
     if (req.headers.cookie) {
         const cookieHeaders = Array.isArray(req.headers.cookie) ? req.headers.cookie : [req.headers.cookie];
-        const cookies = cookieHeaders.map(cookieHeader => tough.Cookie.parse(cookieHeader));
+        const cookies = cookieHeaders.map(cookieHeader => Cookie.parse(cookieHeader));
         const authCookie = cookies.filter(cookie => cookie.key === 'auth')[0];
 
         if (authCookie && authCookie.value === req.url) {
@@ -33,5 +33,3 @@ const server = http.createServer((req, res) => {
     res.writeHead(302);
     res.end();
 });
-
-module.exports = server;

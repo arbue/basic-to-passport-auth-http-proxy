@@ -1,4 +1,4 @@
-const userlist = [
+export const userlist = [
     {
         username: 'user.a@localhost',
         password: 'secret_a',
@@ -13,11 +13,11 @@ const userlist = [
     },
 ];
 
-function getUserdata(username) {
+export function getUserdata(username) {
     return userlist.filter(userObj => userObj.username === username)[0];
 }
 
-function getContent(directory) {
+export function getContent(directory) {
     let content = '';
     for (let i = 0; i < userlist.length; i += 1) {
         if (userlist[i].directory === directory) {
@@ -28,8 +28,3 @@ function getContent(directory) {
     return content;
 }
 
-module.exports = {
-    userlist,
-    getUserdata,
-    getContent,
-};

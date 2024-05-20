@@ -1,12 +1,17 @@
-require('dotenv').config();
-const { exec } = require('child_process');
-const path = require('path');
-const fs = require('fs');
-const { assert } = require('chai');
+import dotenv from 'dotenv';
+dotenv.config()
+import { fileURLToPath } from 'url';
+import { exec } from 'child_process';
+import path, { resolve, join } from 'path';
+import { writeFileSync, readFileSync } from 'fs';
+import { assert } from 'chai';
 
-const fixturesDir = path.resolve(__dirname, 'fixtures');
-const stdoutFixturePath = path.join(fixturesDir, 'stdout');
-const stderrFixturePath = path.join(fixturesDir, 'stderr');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const fixturesDir = resolve(__dirname, 'fixtures');
+const stdoutFixturePath = join(fixturesDir, 'stdout');
+const stderrFixturePath = join(fixturesDir, 'stderr');
 
 const cid = process.env.ONEDRIVE_CID;
 const username = process.env.ONEDRIVE_USERNAME;
@@ -27,8 +32,8 @@ function run(callback) {
 
 if (process.argv[2] === '--write-fixtures') {
     run((stdout, stderr) => {
-        fs.writeFileSync(stdoutFixturePath, stdout);
-        fs.writeFileSync(stderrFixturePath, stderr);
+        writeFileSync(stdoutFixturePath, stdout);
+        writeFileSync(stderrFixturePath, stderr);
 
         console.log('Fixtures written.');
     });
@@ -38,8 +43,8 @@ if (process.argv[2] === '--write-fixtures') {
             this.timeout(60 * 1000); // 60 seconds
 
             run((stdout, stderr) => {
-                const stdoutFixture = fs.readFileSync(stdoutFixturePath, 'utf8');
-                const stderrFixture = fs.readFileSync(stderrFixturePath, 'utf8');
+                const stdoutFixture = readFileSync(stdoutFixturePath, 'utf8');
+                const stderrFixture = readFileSync(stderrFixturePath, 'utf8');
 
                 assert.strictEqual(stdout, stdoutFixture);
                 assert.strictEqual(stderr, stderrFixture);

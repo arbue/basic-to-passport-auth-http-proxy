@@ -1,14 +1,19 @@
-const path = require('path');
-const { fork } = require('child_process');
-const readline = require('readline');
-const axios = require('axios');
-const { assert } = require('chai');
-const AuthHeader = require('../../lib/AuthHeader');
-const partnerServer = require('./passport_servers/partnerServer');
-const configurationServer = require('./passport_servers/configurationServer');
-const authenticationServer = require('./passport_servers/authenticationServer');
-const config = require('./passport_servers/config');
-const users = require('./passport_servers/users');
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { fork } from 'child_process';
+import { createInterface } from 'readline';
+import axios from 'axios';
+import { assert } from 'chai';
+import {AuthHeader} from '../../lib/AuthHeader.js';
+import {partnerServer} from './passport_servers/partnerServer.js';
+import {configurationServer} from './passport_servers/configurationServer.js';
+import {authenticationServer} from './passport_servers/authenticationServer.js';
+import {config} from './passport_servers/config.js';
+import {userlist} from './passport_servers/users.js';
+
+// Create __filename and __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const client = axios.create({
     baseURL: 'http://localhost:3000/', // proxy url
@@ -35,7 +40,7 @@ describe('local tests with mock servers', () => {
 
     before('Start authentication server', (done) => {
         authenticationServer.once('listening', () => {
-            // console.log('Authentication server listening:', authenticationServer.address());
+             // console.log('Authentication server listening:', authenticationServer.address());
             done();
         });
         authenticationServer.listen(config.AUTHENTICATION_SERVER_PORT);
@@ -43,19 +48,19 @@ describe('local tests with mock servers', () => {
 
     let proxyServerChild;
     beforeEach('Start proxy server', (done) => {
-        const env = Object.assign({}, process.env);
+        const env = { ...process.env };
         env.CONFIGURATION_SERVER_URL = config.CONFIGURATION_SERVER_URL;
         env.PROXY_TARGET = config.PARTNER_SERVER_URL;
 
-        const proxyModule = path.resolve(__dirname, '../../lib/server.js');
+        const proxyModule = path.resolve(__dirname, '../../lib/main.js');
 
         proxyServerChild = fork(proxyModule, { env, silent: true });
 
-        const linereader = readline.createInterface({ input: proxyServerChild.stdout });
+        const linereader = createInterface({ input: proxyServerChild.stdout });
         linereader.on('line', (line) => {
             const [, listeningMessage] = line.match(/(Proxy server listening:.*})/) || [];
             if (listeningMessage) {
-                // console.log(listeningMessage);
+                  // console.log(listeningMessage);
                 done();
             }
         });
@@ -83,18 +88,14 @@ describe('local tests with mock servers', () => {
     });
 
     it('should successfully do the Passport authentication process', async () => {
-        const {
-            username, password, directory, content,
-        } = users.userlist[0];
+        const { username, password, directory, content } = userlist[0];
         const res = await client.get(directory, { auth: { username, password } });
         assert.strictEqual(res.status, 200, 'HTTP status code is not 200');
         assert.strictEqual(res.data, content, 'Did not receive the expected content');
     });
 
     it('should successfully handle subsequent requests', async () => {
-        const {
-            username, password, directory, content,
-        } = users.userlist[0];
+        const { username, password, directory, content } = userlist[0];
         let res = await client.get(directory, { auth: { username, password } });
         assert.strictEqual(res.status, 200, 'HTTP status code is not 200');
         assert.strictEqual(res.data, content, 'Did not receive the expected content');
@@ -109,14 +110,14 @@ describe('local tests with mock servers', () => {
             password: passwordA,
             directory: directoryA,
             content: contentA,
-        } = users.userlist[0];
+        } = userlist[0];
 
         const {
             username: usernameB,
             password: passwordB,
             directory: directoryB,
             content: contentB,
-        } = users.userlist[1];
+        } = userlist[1];
 
         let res = await client.get(directoryA, { auth: { username: usernameA, password: passwordA } });
         assert.strictEqual(res.status, 200, 'HTTP status code is not 200');
