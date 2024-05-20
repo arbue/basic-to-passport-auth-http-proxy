@@ -20,9 +20,9 @@ jobs:
         node-version: [20.x]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
       - name: Install dependencies
@@ -31,7 +31,7 @@ jobs:
         run: npm run test:local
 
   test-onedrive_litmus:
-
+    if: false # disabled. OneDrive seems to block access from gh actions runner - locally works fine.
     runs-on: ubuntu-latest
 
     environment: test
@@ -54,7 +54,7 @@ jobs:
       - run: rm -rf litmus_setup
       - run: docker network create litmus_network 
       - run: docker run --name passport-proxy -d -e PROXY_TARGET=https://d.docs.live.net/ --network litmus_network passport-proxy
-      - name: Sleep for 30 seconds
+      - name: Sleep a bit
         run: sleep 5s
         shell: bash
       - name: Run tests
