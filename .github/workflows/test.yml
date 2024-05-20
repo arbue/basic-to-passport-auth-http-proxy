@@ -51,6 +51,7 @@ jobs:
       - run: docker build -t litmus litmus-4d04ea01cd16574b8046d547aa5b773715372994/
       - run: cd ..
       - run: rm -rf litmus_setup
+      - run: docker network create litmus_network 
       - run: docker run --name passport-proxy -d -e PROXY_TARGET=https://d.docs.live.net/ --network litmus_network passport-proxy
       - name: Run tests
         env:
