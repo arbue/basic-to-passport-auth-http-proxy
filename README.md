@@ -1,7 +1,5 @@
 # basic-to-passport-auth-http-proxy
 
-[![Build Status](https://travis-ci.org/skleeschulte/basic-to-passport-auth-http-proxy.svg?branch=master)](https://travis-ci.org/skleeschulte/basic-to-passport-auth-http-proxy)
-
 HTTP proxy server that can access resources which use the Passport SSI Version 1.4 Protocol for authorization with
 credentials supplied by Basic HTTP authentication.
 
@@ -24,12 +22,12 @@ Options are set with environment variables:
 ### Running with Docker
 
 - Find the latest Docker image tag at Docker Hub:  
-  https://hub.docker.com/r/skleeschulte/basic-to-passport-auth-http-proxy
+  https://github.com/arbue/basic-to-passport-auth-http-proxy/pkgs/container/basic-to-passport-auth-http-proxy
 - Pull the image:  
-  `docker pull skleeschulte/basic-to-passport-auth-http-proxy:TAG`  
+  `docker pull ghcr.io/arbue/basic-to-passport-auth-http-proxy:TAG`  
   (Replace TAG with an actual tag from the Docker Hub.)
 - Run the image:  
-  `docker run --name passport-proxy -d -p 3000:3000 -e PROXY_TARGET=https://d.docs.live.net/ --restart always skleeschulte/basic-to-passport-auth-http-proxy:TAG`  
+  `docker run --name passport-proxy -d -p 3000:3000 -e PROXY_TARGET=https://d.docs.live.net/ --restart always ghcr.io/arbue/basic-to-passport-auth-http-proxy:TAG`  
   (Again, replace TAG with the one you just pulled.)
 - Check if it started successfully:  
   `docker logs passport-proxy`  

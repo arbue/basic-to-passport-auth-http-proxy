@@ -6,17 +6,19 @@
     "http",
     "proxy",
     "Basic authentication",
-    "Passport 1.4 authentication"
+    "Passport 1.4 authentication",
+    "fork",
+    "https://github.com/skleeschulte/basic-to-passport-auth-http-proxy"
   ],
   "type": "module",
   "license": "MIT",
   "author": {
-    "name": "Stefan Kleeschulte",
-    "url": "https://github.com/skleeschulte"
+    "name": "arbue",
+    "url": "https://github.com/arbue"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/skleeschulte/basic-to-passport-auth-http-proxy.git"
+    "url": "https://github.com/arbue/basic-to-passport-auth-http-proxy.git"
   },
   "main": "lib/main.js",
   "scripts": {
