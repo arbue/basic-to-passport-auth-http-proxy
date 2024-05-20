@@ -49,7 +49,7 @@ Make sure you have a suitable Node.js installed (the proxy server was developed 
   On Linux: `export PROXY_TARGET=https://d.docs.live.net/`  
   On Windows: `set PROXY_TARGET=https://d.docs.live.net/`
 - Run the server:  
-  `node lib/server.js`
+  `node lib/main.js`
 
 ## Usage
 
