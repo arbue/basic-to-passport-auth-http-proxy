@@ -22,7 +22,7 @@ if (!cid || !username || !password) {
         + ' ONEDRIVE_PASSWORD must be set.');
 }
 
-const command = `docker run --link passport-proxy:proxy litmus http://proxy:3000/${cid}/ '${username}' '${password}'`;
+const command = `docker run --network litmus_network litmus http://passport-proxy:3000/${cid}/ '${username}' '${password}'`;
 
 function run(callback) {
     exec(command, (error, stdout, stderr) => {
