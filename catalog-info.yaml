@@ -4,7 +4,7 @@ metadata:
   name: basic-to-passport-auth-http-proxy
   annotations:
     github.com/project-slug: arbue/basic-to-passport-auth-http-proxy
-    backstage.io/techdocs-ref: dir: docs
+    backstage.io/techdocs-ref: dir: ./docs
 spec:
   type: other
   lifecycle: unknown
