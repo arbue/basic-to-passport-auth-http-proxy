@@ -4,6 +4,11 @@ import { AuthHeader } from '../../../lib/AuthHeader.js';
 import { parsePassportParameters } from '../../../lib/parsePassportParameters.js';
 import { getUserdata } from './users.js';
 
+export const receivedCookieHeaders = [];
+export function clearReceivedCookieHeaders() {
+    receivedCookieHeaders.length = 0;
+}
+
 function send401(res) {
     res.setHeader('WWW-Authenticate', 'Passport1.4 da-status=failed,srealm=PassportTest,ctoken=abc');
     res.writeHead(401);
@@ -13,6 +18,8 @@ function send401(res) {
 // eslint-disable-next-line consistent-return
 export const authenticationServer = createServer((req, res) => {
     res.setHeader('PassportConfig', 'ConfigVersion=1');
+
+    receivedCookieHeaders.push(req.headers.cookie || null);
 
     const authorizationHeader = new AuthHeader(req.headers.authorization);
 
