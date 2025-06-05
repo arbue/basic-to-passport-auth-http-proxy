@@ -7,9 +7,14 @@ import { assert } from 'chai';
 import {AuthHeader} from '../../lib/AuthHeader.js';
 import {partnerServer} from './passport_servers/partnerServer.js';
 import {configurationServer} from './passport_servers/configurationServer.js';
-import {authenticationServer} from './passport_servers/authenticationServer.js';
+import {
+    authenticationServer,
+    receivedCookieHeaders,
+    clearReceivedCookieHeaders,
+} from './passport_servers/authenticationServer.js';
 import {config} from './passport_servers/config.js';
 import {userlist} from './passport_servers/users.js';
+import { RequestBodyCache } from '../../lib/RequestBodyCache.js';
 
 // Create __filename and __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -48,6 +53,8 @@ describe('local tests with mock servers', () => {
 
     let proxyServerChild;
     beforeEach('Start proxy server', (done) => {
+        clearReceivedCookieHeaders();
+
         const env = { ...process.env };
         env.CONFIGURATION_SERVER_URL = config.CONFIGURATION_SERVER_URL;
         env.PROXY_TARGET = config.PARTNER_SERVER_URL;
@@ -104,6 +111,27 @@ describe('local tests with mock servers', () => {
         assert.strictEqual(res.data, content, 'Did not receive the expected content');
     });
 
+    it('should send stored cookies to the authentication server', async () => {
+        const {
+            username: usernameA,
+            password: passwordA,
+            directory: directoryA,
+        } = userlist[0];
+
+        const { directory: directoryB } = userlist[1];
+
+        await client.get(directoryA, { auth: { username: usernameA, password: passwordA } });
+
+        assert.isNull(receivedCookieHeaders[0], 'Initial Token Request contains Cookie header');
+        assert.isNull(receivedCookieHeaders[1], 'Initial Sign-in Request contains Cookie header');
+
+        await client.get(directoryB, { auth: { username: usernameA, password: passwordA } });
+
+        const lastCookie = receivedCookieHeaders[receivedCookieHeaders.length - 2];
+        assert.strictEqual(lastCookie, 'auth=' + directoryA,
+            'Authentication server did not receive cookie header');
+    });
+
     it('should not allow user A to access content of user B', async () => {
         const {
             username: usernameA,
@@ -130,6 +158,25 @@ describe('local tests with mock servers', () => {
         res = await client.get(directoryB, { auth: { username: usernameA, password: passwordA } });
         assert.strictEqual(res.status, 401, 'HTTP status code is not 401');
         assert.isNull(res.data, 'Response has content, but no content was expected');
+
+        const lastCookie = receivedCookieHeaders[receivedCookieHeaders.length - 2];
+        assert.strictEqual(lastCookie, 'auth=' + directoryA, 'Authentication server did not receive cookie header');
+    });
+
+    it('should respond with 503 when request body exceeds cache size', async () => {
+        const { username, password, directory } = userlist[0];
+        const body = 'x'.repeat(RequestBodyCache.getMaxCacheSize() + 1);
+
+        const res = await client.post(directory, body, {
+            auth: { username, password },
+            headers: { 'Content-Type': 'text/plain' },
+            validateStatus: () => true,
+        });
+
+        assert.strictEqual(res.status, 503, 'HTTP status code is not 503');
+        assert.property(res.headers, 'x-proxy-error', 'X-Proxy-Error header missing');
+        assert.include(res.headers['x-proxy-error'], String(RequestBodyCache.getMaxCacheSize()),
+            'X-Proxy-Error header does not mention cache size');
     });
 
     after('Stop authentication server', (done) => {
