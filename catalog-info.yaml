@@ -1,0 +1,11 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: basic-to-passport-auth-http-proxy
+  annotations:
+    github.com/project-slug: arbue/basic-to-passport-auth-http-proxy
+    backstage.io/techdocs-ref: dir:.
+spec:
+  type: other
+  lifecycle: unknown
+  owner: guests
