@@ -14,6 +14,7 @@ import {
 } from './passport_servers/authenticationServer.js';
 import {config} from './passport_servers/config.js';
 import {userlist} from './passport_servers/users.js';
+import { RequestBodyCache } from '../../lib/RequestBodyCache.js';
 
 // Create __filename and __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -139,6 +140,22 @@ describe('local tests with mock servers', () => {
 
         const lastCookie = receivedCookieHeaders[receivedCookieHeaders.length - 2];
         assert.strictEqual(lastCookie, 'auth=' + directoryA, 'Authentication server did not receive cookie header');
+    });
+
+    it('should respond with 503 when request body exceeds cache size', async () => {
+        const { username, password, directory } = userlist[0];
+        const body = 'x'.repeat(RequestBodyCache.getMaxCacheSize() + 1);
+
+        const res = await client.post(directory, body, {
+            auth: { username, password },
+            headers: { 'Content-Type': 'text/plain' },
+            validateStatus: () => true,
+        });
+
+        assert.strictEqual(res.status, 503, 'HTTP status code is not 503');
+        assert.property(res.headers, 'x-proxy-error', 'X-Proxy-Error header missing');
+        assert.include(res.headers['x-proxy-error'], String(RequestBodyCache.getMaxCacheSize()),
+            'X-Proxy-Error header does not mention cache size');
     });
 
     after('Stop authentication server', (done) => {
