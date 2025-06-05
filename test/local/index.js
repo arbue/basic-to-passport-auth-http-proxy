@@ -11,6 +11,7 @@ import {
     authenticationServer,
     receivedCookieHeaders,
     clearReceivedCookieHeaders,
+    resetRedirectFlag,
 } from './passport_servers/authenticationServer.js';
 import {config} from './passport_servers/config.js';
 import {userlist} from './passport_servers/users.js';
@@ -54,6 +55,7 @@ describe('local tests with mock servers', () => {
     let proxyServerChild;
     beforeEach('Start proxy server', (done) => {
         clearReceivedCookieHeaders();
+        resetRedirectFlag();
 
         const env = { ...process.env };
         env.CONFIGURATION_SERVER_URL = config.CONFIGURATION_SERVER_URL;
@@ -177,6 +179,15 @@ describe('local tests with mock servers', () => {
         assert.property(res.headers, 'x-proxy-error', 'X-Proxy-Error header missing');
         assert.include(res.headers['x-proxy-error'], String(RequestBodyCache.getMaxCacheSize()),
             'X-Proxy-Error header does not mention cache size');
+    });
+
+    it('should follow authentication server redirects', async () => {
+        const { username, password, directory, content } = userlist[2];
+
+        const res = await client.get(directory, { auth: { username, password } });
+
+        assert.strictEqual(res.status, 200, 'HTTP status code is not 200');
+        assert.strictEqual(res.data, content, 'Did not receive the expected content');
     });
 
     after('Stop authentication server', (done) => {

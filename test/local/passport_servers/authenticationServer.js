@@ -3,10 +3,16 @@ import { assert } from 'chai';
 import { AuthHeader } from '../../../lib/AuthHeader.js';
 import { parsePassportParameters } from '../../../lib/parsePassportParameters.js';
 import { getUserdata } from './users.js';
+import { config } from './config.js';
 
 export const receivedCookieHeaders = [];
 export function clearReceivedCookieHeaders() {
     receivedCookieHeaders.length = 0;
+}
+
+let redirectFlag = false;
+export function resetRedirectFlag() {
+    redirectFlag = false;
 }
 
 function send401(res) {
@@ -65,6 +71,14 @@ export const authenticationServer = createServer((req, res) => {
 
     if (userdata.directory !== challengeParameters['resource']) {
         return send401(res);
+    }
+
+    if (userdata.redirect && !redirectFlag) {
+        redirectFlag = true;
+        res.setHeader('Authentication-Info', 'Passport1.4 da-status=redir');
+        res.setHeader('Location', `${config.AUTHENTICATION_SERVER_URL}redirect`);
+        res.writeHead(302);
+        return res.end();
     }
 
     res.setHeader('Authentication-Info', 'Passport1.4 da-status=success'

@@ -11,6 +11,13 @@ export const userlist = [
         directory: '/b/',
         content: 'bbb',
     },
+    {
+        username: 'user.redirect@localhost',
+        password: 'secret_redirect',
+        directory: '/redirect/',
+        content: 'redirected',
+        redirect: true,
+    },
 ];
 
 export function getUserdata(username) {
