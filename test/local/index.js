@@ -7,7 +7,11 @@ import { assert } from 'chai';
 import {AuthHeader} from '../../lib/AuthHeader.js';
 import {partnerServer} from './passport_servers/partnerServer.js';
 import {configurationServer} from './passport_servers/configurationServer.js';
-import {authenticationServer} from './passport_servers/authenticationServer.js';
+import {
+    authenticationServer,
+    receivedCookieHeaders,
+    clearReceivedCookieHeaders,
+} from './passport_servers/authenticationServer.js';
 import {config} from './passport_servers/config.js';
 import {userlist} from './passport_servers/users.js';
 import { RequestBodyCache } from '../../lib/RequestBodyCache.js';
@@ -49,6 +53,8 @@ describe('local tests with mock servers', () => {
 
     let proxyServerChild;
     beforeEach('Start proxy server', (done) => {
+        clearReceivedCookieHeaders();
+
         const env = { ...process.env };
         env.CONFIGURATION_SERVER_URL = config.CONFIGURATION_SERVER_URL;
         env.PROXY_TARGET = config.PARTNER_SERVER_URL;
@@ -131,6 +137,9 @@ describe('local tests with mock servers', () => {
         res = await client.get(directoryB, { auth: { username: usernameA, password: passwordA } });
         assert.strictEqual(res.status, 401, 'HTTP status code is not 401');
         assert.isNull(res.data, 'Response has content, but no content was expected');
+
+        const lastCookie = receivedCookieHeaders[receivedCookieHeaders.length - 2];
+        assert.strictEqual(lastCookie, 'auth=' + directoryA, 'Authentication server did not receive cookie header');
     });
 
     it('should respond with 503 when request body exceeds cache size', async () => {
